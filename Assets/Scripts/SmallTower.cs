@@ -5,7 +5,7 @@ public class SmallTower : TowerBase
     private void Start()
     {
         nombreTorre = "Torre Pequeña";
-        tiempoEntreAtaques = 0.8f;
+        tiempoEntreAtaques = 0.5f;
         dano = 10;
     }
 

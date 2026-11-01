@@ -17,4 +17,11 @@ public class SniperTower : TowerBase
             DispararProyectil();
         }
     }
+
+    public override void MejorarTorre()
+    {
+        base.MejorarTorre();
+
+        rangoAtaque += 2f;
+    }
 }

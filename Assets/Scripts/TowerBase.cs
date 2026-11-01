@@ -1,10 +1,10 @@
 using UnityEngine;
+using System;
 
-public class TowerBase : MonoBehaviour
+public abstract class TowerBase : MonoBehaviour, IMejorable
 {
     protected string nombreTorre = "Torre Base";
     protected int nivel = 1;
-    protected int vidaActual = 100;
     protected int dano = 15;
 
     [SerializeField] protected float rangoAtaque = 8f;
@@ -15,12 +15,10 @@ public class TowerBase : MonoBehaviour
     protected float contadorAtaque = 0f;
     protected Transform enemigoObjetivo;
 
+    public static event Action<string> OnTorreDispara;
+
     protected virtual void Update()
     {
-        if (vidaActual <= 0)
-        {
-            return;
-        }
         BuscarEnemigoCercano();
 
         contadorAtaque += Time.deltaTime;
@@ -86,18 +84,11 @@ public class TowerBase : MonoBehaviour
         int costo = CalcularFibonacci(nivel + 1) * 50;
         nivel++;
         dano += 15;
-        vidaActual += 50;
         Debug.Log($"{nombreTorre} subió al Nivel {nivel}! Costo: {costo} oro.");
     }
 
-    public virtual void AtacarEnemigoActual()
-    {
-        if (enemigoObjetivo != null)
-        {
-            DispararProyectil();
-        }
-    }
-
+    public abstract void AtacarEnemigoActual();
+   
     protected virtual void DispararProyectil()
     {
         if (prefabBala == null)
@@ -123,16 +114,8 @@ public class TowerBase : MonoBehaviour
         {
             scriptBala.Configurar(enemigoObjetivo, dano);
         }
-    }
 
-    public virtual void RecibirDano(int cantidad)
-    {
-        vidaActual -= cantidad;
-        if (vidaActual <= 0)
-        {
-            vidaActual = 0;
-            Destroy(gameObject);
-        }
+        OnTorreDispara?.Invoke(nombreTorre);
     }
 
     private void OnDrawGizmosSelected()

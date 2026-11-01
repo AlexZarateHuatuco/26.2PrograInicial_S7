@@ -13,7 +13,6 @@ public class SmallTower : TowerBase
     {
         if (enemigoObjetivo != null)
         {
-            Debug.Log($"{nombreTorre} dispara ráfaga rápida");
             DispararProyectil();
         }
     }

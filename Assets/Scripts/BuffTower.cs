@@ -13,8 +13,13 @@ public class BuffTower : TowerBase
     {
         if (enemigoObjetivo != null)
         {
-            Debug.Log($"{nombreTorre} realiza ataque pesado");
             DispararProyectil();
         }
+    }
+
+    public override void MejorarTorre()
+    {
+        base.MejorarTorre();
+        dano += 10;
     }
 }

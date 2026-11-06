@@ -1,212 +1,244 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public enum EnemyState
-{
-    Wander,
-    Chase,
-    Search
-}
-
 public class EnemyAI : MonoBehaviour
 {
-    [SerializeField] private PlayerController playerController;
+    [Header("Objetivos")]
+    [SerializeField] private Nexo nexo;
 
-    public PlayerController PlayerControllerReference
-    {
-        get;
-        private set;
-    }
+    [Header("Movimiento")]
+    [SerializeField] private float velocidad = 3f;
+    [SerializeField] private float intervaloActualizarDestino = 0.25f;
 
-    public Transform Player
-    {
-        get;
-        private set;
-    }
-
-    public NavMeshAgent Agent
-    {
-        get;
-        private set;
-    }
-
-    [SerializeField] private float wanderSpeed = 2f;
-    [SerializeField] private float chaseSpeed = 4f;
-    [SerializeField] private float wanderRadius = 15f;
-    [SerializeField] private float destinationDistance = 1.5f;
-
-    [SerializeField] private float detectionRange = 10f;
-    [SerializeField] private float searchDuration = 2f;
-
+    [Header("Ataque")]
+    [SerializeField] private GameObject prefabBala;
+    [SerializeField] private Transform puntaPistola;
+    [SerializeField] private float rangoAtaque = 8f;
+    [SerializeField] private float tiempoEntreAtaques = 1.5f;
     [SerializeField] private int damage = 10;
+    [SerializeField] private float velocidadGiro = 8f;
 
-    private EnemyState currentState;
+    [Header("Munición")]
+    [SerializeField] private int cantidadBalas = 6;
+    [SerializeField] private float tiempoRecarga = 2f;
 
-    private Vector3 lastKnownPosition;
+    [Header("Vida y represalia")]
+    [SerializeField] private int vidaMaxima = 100;
+    [SerializeField] private float distanciaMaximaPersecucionTorre = 15f;
 
-    private float searchTimer;
+    public NavMeshAgent Agent { get; private set; }
+
+    private int vidaActual;
+    private Transform torreAgresora;
+    private float contadorAtaque;
+    private float contadorDestino;
+
+    private int balasActuales;
+    private bool recargando;
+    private float contadorRecarga;
 
     private void Awake()
     {
         Agent = GetComponent<NavMeshAgent>();
+        vidaActual = vidaMaxima;
+        balasActuales = cantidadBalas;
 
-        if (playerController == null)
+        if (nexo == null)
         {
-            playerController = FindFirstObjectByType<PlayerController>();
-        }
-
-        PlayerControllerReference = playerController;
-
-        if (PlayerControllerReference != null)
-        {
-            Player = PlayerControllerReference.transform;
+            nexo = FindFirstObjectByType<Nexo>();
         }
     }
 
     private void Start()
     {
-        Agent.speed = wanderSpeed;
-
-        currentState = EnemyState.Wander;
-
-        SetRandomDestination();
+        Agent.speed = velocidad;
+        Agent.stoppingDistance = 0f;
     }
 
     private void Update()
     {
-        if (PlayerControllerReference == null)
+        ActualizarRecarga();
+
+        Transform objetivo = ObtenerObjetivoActual();
+
+        if (objetivo == null)
         {
+            Agent.isStopped = true;
             return;
         }
 
-        switch (currentState)
+        contadorAtaque += Time.deltaTime;
+
+        float distancia = Vector3.Distance(transform.position, objetivo.position);
+
+        if (distancia <= rangoAtaque)
         {
-            case EnemyState.Wander:
-                Wander();
-                break;
-
-            case EnemyState.Chase:
-                Chase();
-                break;
-
-            case EnemyState.Search:
-                Search();
-                break;
-        }
-    }
-
-    private bool PlayerInRange()
-    {
-        float distance = Vector3.Distance(
-            transform.position,
-            Player.position
-        );
-
-        if (distance <= detectionRange)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private void Wander()
-    {
-        Agent.speed = wanderSpeed;
-
-        if (PlayerInRange())
-        {
-            currentState = EnemyState.Chase;
-            return;
-        }
-
-        if (!Agent.pathPending)
-        {
-            if (Agent.remainingDistance <= destinationDistance)
-            {
-                SetRandomDestination();
-            }
-        }
-    }
-
-    private void Chase()
-    {
-        Agent.speed = chaseSpeed;
-
-        if (PlayerInRange())
-        {
-            lastKnownPosition = Player.position;
-
-            Agent.SetDestination(Player.position);
+            Atacar(objetivo);
         }
         else
         {
-            lastKnownPosition = Player.position;
-
-            searchTimer = searchDuration;
-
-            currentState = EnemyState.Search;
-
-            Agent.SetDestination(lastKnownPosition);
+            Mover(objetivo);
         }
     }
 
-    private void Search()
+    private Transform ObtenerObjetivoActual()
     {
-        Agent.speed = wanderSpeed;
-
-        if (PlayerInRange())
+        if (torreAgresora != null)
         {
-            currentState = EnemyState.Chase;
+            float distanciaTorre = Vector3.Distance(transform.position, torreAgresora.position);
+
+            if (distanciaTorre <= distanciaMaximaPersecucionTorre)
+            {
+                return torreAgresora;
+            }
+
+            torreAgresora = null;
+        }
+
+        if (nexo != null)
+        {
+            return nexo.transform;
+        }
+
+        return null;
+    }
+
+    private void Mover(Transform objetivo)
+    {
+        Agent.isStopped = false;
+
+        contadorDestino += Time.deltaTime;
+
+        if (contadorDestino >= intervaloActualizarDestino)
+        {
+            contadorDestino = 0f;
+            Agent.SetDestination(objetivo.position);
+        }
+    }
+
+    private void Atacar(Transform objetivo)
+    {
+        Agent.isStopped = true;
+        Agent.ResetPath();
+
+        MirarHacia(objetivo);
+
+        if (recargando)
+        {
             return;
         }
 
-        searchTimer -= Time.deltaTime;
-
-        if (searchTimer <= 0f)
+        if (contadorAtaque >= tiempoEntreAtaques)
         {
-            currentState = EnemyState.Wander;
-
-            SetRandomDestination();
+            Disparar(objetivo);
+            contadorAtaque = 0f;
         }
     }
 
-    private void SetRandomDestination()
+    private void MirarHacia(Transform objetivo)
     {
-        Vector3 randomPosition =
-            Random.insideUnitSphere * wanderRadius;
+        Vector3 direccion = objetivo.position - transform.position;
+        direccion.y = 0f;
 
-        randomPosition += transform.position;
-
-        NavMeshHit hit;
-
-        if (NavMesh.SamplePosition(
-            randomPosition,
-            out hit,
-            wanderRadius,
-            NavMesh.AllAreas))
+        if (direccion.sqrMagnitude < 0.001f)
         {
-            Agent.SetDestination(hit.position);
+            return;
+        }
+
+        Quaternion rotacionDeseada = Quaternion.LookRotation(direccion);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            rotacionDeseada,
+            velocidadGiro * Time.deltaTime
+        );
+    }
+
+    private void Disparar(Transform objetivo)
+    {
+        if (prefabBala == null || puntaPistola == null)
+        {
+            return;
+        }
+
+        GameObject nuevaBala = Instantiate(prefabBala, puntaPistola.position, puntaPistola.rotation);
+
+        Projectile scriptBala = nuevaBala.GetComponent<Projectile>();
+        if (scriptBala != null)
+        {
+            scriptBala.Configurar(objetivo, damage);
+        }
+
+        balasActuales--;
+
+        if (balasActuales <= 0)
+        {
+            recargando = true;
+            contadorRecarga = 0f;
+        }
+    }
+
+    private void ActualizarRecarga()
+    {
+        if (!recargando)
+        {
+            return;
+        }
+
+        contadorRecarga += Time.deltaTime;
+
+        if (contadorRecarga >= tiempoRecarga)
+        {
+            balasActuales = cantidadBalas;
+            recargando = false;
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        PlayerController detectedPlayer =
-            other.GetComponentInParent<PlayerController>();
-
-        if (detectedPlayer == null)
+        if (!other.CompareTag("TowerBullet"))
         {
             return;
         }
 
-        if (detectedPlayer != PlayerControllerReference)
+        Projectile bala = other.GetComponentInParent<Projectile>();
+        if (bala == null)
         {
             return;
         }
 
-        PlayerControllerReference.ModificarVida(-damage);
+        RecibirDano(bala.Dano);
+        Destroy(bala.gameObject);
 
-        Debug.Log("El enemigo ha causado " + damage + " puntos de daño.");
+        torreAgresora = BuscarTorreMasCercana();
+    }
+
+    private Transform BuscarTorreMasCercana()
+    {
+        TowerBase[] torres = FindObjectsByType<TowerBase>(FindObjectsSortMode.None);
+        Transform masCercana = null;
+        float menorDistancia = Mathf.Infinity;
+
+        foreach (TowerBase torre in torres)
+        {
+            float distancia = Vector3.Distance(transform.position, torre.transform.position);
+
+            if (distancia < menorDistancia)
+            {
+                menorDistancia = distancia;
+                masCercana = torre.transform;
+            }
+        }
+
+        return masCercana;
+    }
+
+    public void RecibirDano(int cantidad)
+    {
+        vidaActual -= cantidad;
+
+        if (vidaActual <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 }

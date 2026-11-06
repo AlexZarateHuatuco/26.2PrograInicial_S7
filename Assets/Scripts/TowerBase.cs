@@ -11,6 +11,7 @@ public abstract class TowerBase : MonoBehaviour, IMejorable
     [SerializeField] protected float tiempoEntreAtaques = 1.5f;
     [SerializeField] protected GameObject prefabBala;
     [SerializeField] protected Transform spawnPoint;
+    [SerializeField] protected int vida = 100;
 
     protected float contadorAtaque = 0f;
     protected Transform enemigoObjetivo;
@@ -88,7 +89,35 @@ public abstract class TowerBase : MonoBehaviour, IMejorable
     }
 
     public abstract void AtacarEnemigoActual();
-   
+
+    protected virtual void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("EnemyBullet"))
+        {
+            return;
+        }
+
+        Projectile bala = other.GetComponentInParent<Projectile>();
+        if (bala == null)
+        {
+            return;
+        }
+
+        RecibirDano(bala.Dano, bala.Atacante);
+        Destroy(bala.gameObject);
+    }
+
+    public virtual void RecibirDano(int cantidad, GameObject atacante)
+    {
+        vida -= cantidad;
+
+        if (vida <= 0)
+        {
+            Debug.Log($"{nombreTorre} fue destruida.");
+            Destroy(gameObject);
+        }
+    }
+
     protected virtual void DispararProyectil()
     {
         if (prefabBala == null)
@@ -112,7 +141,7 @@ public abstract class TowerBase : MonoBehaviour, IMejorable
         Projectile scriptBala = nuevaBala.GetComponent<Projectile>();
         if (scriptBala != null)
         {
-            scriptBala.Configurar(enemigoObjetivo, dano);
+            scriptBala.Configurar(enemigoObjetivo, dano, gameObject);
         }
 
         OnTorreDispara?.Invoke(nombreTorre);

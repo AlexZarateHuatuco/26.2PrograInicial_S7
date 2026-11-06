@@ -27,6 +27,7 @@ public class EnemyAI : MonoBehaviour
     private Transform torreAgresora;
     private float contadorAtaque;
     private float contadorDestino;
+    private float contadorBusquedaNexo;
 
     private int balasActuales;
     private bool recargando;
@@ -88,6 +89,17 @@ public class EnemyAI : MonoBehaviour
             }
 
             torreAgresora = null;
+        }
+
+        if (nexo == null)
+        {
+            contadorBusquedaNexo += Time.deltaTime;
+
+            if (contadorBusquedaNexo >= 1f)
+            {
+                contadorBusquedaNexo = 0f;
+                nexo = FindFirstObjectByType<Nexo>();
+            }
         }
 
         if (nexo != null)

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 [Serializable]
 public class GrupoEnemigos
@@ -68,6 +69,10 @@ public class GestorJuego : MonoBehaviour
                 vivos.RemoveAt(i);
             }
         }
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            SceneManager.LoadScene("Victoria");
+        }
     }
 
     public void Agregar(int cantidad)
@@ -115,6 +120,7 @@ public class GestorJuego : MonoBehaviour
         }
 
         Estado = "¡Victoria!";
+        SceneManager.LoadScene("Victoria");
     }
 
     private IEnumerator Cuenta(float segundos, string texto)
@@ -149,5 +155,6 @@ public class GestorJuego : MonoBehaviour
     {
         StopAllCoroutines();
         Estado = "Derrota";
+        SceneManager.LoadScene("Derrota");
     }
 }

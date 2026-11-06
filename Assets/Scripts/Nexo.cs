@@ -1,9 +1,10 @@
-using UnityEngine;
 using System;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Nexo : MonoBehaviour
 {
-    [SerializeField] private int vidaMaxima = 500;
+    [SerializeField] private int vidaMaxima = 20;
 
     private int vidaActual;
 
@@ -17,19 +18,10 @@ public class Nexo : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("EnemyBullet"))
+        if (other.CompareTag("EnemyBullet"))
         {
-            return;
+            RecibirDano(10);
         }
-
-        Projectile bala = other.GetComponentInParent<Projectile>();
-        if (bala == null)
-        {
-            return;
-        }
-
-        RecibirDano(bala.Dano);
-        Destroy(bala.gameObject);
     }
 
     public void RecibirDano(int cantidad)
@@ -42,6 +34,16 @@ public class Nexo : MonoBehaviour
             OnNexoDestruido?.Invoke();
             Debug.Log("El Nexo ha sido destruido.");
             Destroy(gameObject);
+
         }
+    }
+    private void OnEnable()
+    {
+        // Suscribirse al evento
+        OnNexoDestruido += CambiarADerrota;
+    }
+    void CambiarADerrota()
+    {
+        SceneManager.LoadScene("Derrota");
     }
 }

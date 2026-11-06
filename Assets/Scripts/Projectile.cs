@@ -27,7 +27,7 @@ public class Projectile : MonoBehaviour
         float distanciaAlObjetivo = Vector3.Distance(transform.position, objetivo.position);
         if (distanciaAlObjetivo > distanciaMaxima)
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
             return;
         }
 

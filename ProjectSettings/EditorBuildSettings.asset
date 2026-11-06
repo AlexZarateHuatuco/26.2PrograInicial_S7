@@ -6,8 +6,20 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/Scenes/Menu.unity
+    guid: 673638b5470971546b7b12ce237104e6
+  - enabled: 1
+    path: Assets/Scenes/Credito.unity
+    guid: 59049e4b42038fc4f9345513a75680d1
+  - enabled: 1
+    path: Assets/Scenes/Derrota.unity
+    guid: 6a27316990a14a4408f3c222e9a51e13
+  - enabled: 1
+    path: Assets/Scenes/Juego.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/Victoria.unity
+    guid: 5bd88ec179304964c81ae324d34b707a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

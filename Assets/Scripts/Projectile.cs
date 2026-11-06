@@ -8,10 +8,15 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float tiempoDeVidaMaximo = 1.2f;
     [SerializeField] private float distanciaMaxima = 10f;
 
-    public void Configurar(Transform objetivoEnemigo, int dano)
+    // Lectura para quien recibe el impacto (EnemyAI, TowerBase, Nexo)
+    public int Dano => danoAplicar;
+    public GameObject Atacante { get; private set; }
+
+    public void Configurar(Transform objetivoEnemigo, int dano, GameObject origen = null)
     {
         this.objetivo = objetivoEnemigo;
         this.danoAplicar = dano;
+        this.Atacante = origen;
 
         Destroy(gameObject, tiempoDeVidaMaximo);
     }

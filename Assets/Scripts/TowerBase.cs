@@ -103,11 +103,11 @@ public abstract class TowerBase : MonoBehaviour, IMejorable
             return;
         }
 
-        RecibirDano(bala.Dano, bala.Atacante);
+        RecibirDano(bala.Dano);
         Destroy(bala.gameObject);
     }
 
-    public virtual void RecibirDano(int cantidad, GameObject atacante)
+    public virtual void RecibirDano(int cantidad)
     {
         vida -= cantidad;
 
@@ -141,7 +141,7 @@ public abstract class TowerBase : MonoBehaviour, IMejorable
         Projectile scriptBala = nuevaBala.GetComponent<Projectile>();
         if (scriptBala != null)
         {
-            scriptBala.Configurar(enemigoObjetivo, dano, gameObject);
+            scriptBala.Configurar(enemigoObjetivo, dano);
         }
 
         OnTorreDispara?.Invoke(nombreTorre);

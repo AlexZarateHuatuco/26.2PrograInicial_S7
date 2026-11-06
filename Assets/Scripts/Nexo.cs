@@ -28,11 +28,11 @@ public class Nexo : MonoBehaviour
             return;
         }
 
-        RecibirDano(bala.Dano, bala.Atacante);
+        RecibirDano(bala.Dano);
         Destroy(bala.gameObject);
     }
 
-    public void RecibirDano(int cantidad, GameObject atacante)
+    public void RecibirDano(int cantidad)
     {
         vidaActual -= cantidad;
         OnVidaCambiada?.Invoke(vidaActual, vidaMaxima);

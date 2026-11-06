@@ -7,7 +7,7 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float velocidad = 12f;
     [SerializeField] private float tiempoDeVidaMaximo = 1.2f;
     [SerializeField] private float distanciaMaxima = 10f;
-
+    public int Dano => danoAplicar;
     public void Configurar(Transform objetivoEnemigo, int dano)
     {
         this.objetivo = objetivoEnemigo;

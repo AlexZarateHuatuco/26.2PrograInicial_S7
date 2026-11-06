@@ -3,14 +3,11 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    [Header("Objetivos")]
     [SerializeField] private Nexo nexo;
 
-    [Header("Movimiento")]
     [SerializeField] private float velocidad = 3f;
     [SerializeField] private float intervaloActualizarDestino = 0.25f;
 
-    [Header("Ataque")]
     [SerializeField] private GameObject prefabBala;
     [SerializeField] private Transform puntaPistola;
     [SerializeField] private float rangoAtaque = 8f;
@@ -18,11 +15,9 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private int damage = 10;
     [SerializeField] private float velocidadGiro = 8f;
 
-    [Header("Munición")]
     [SerializeField] private int cantidadBalas = 6;
     [SerializeField] private float tiempoRecarga = 2f;
 
-    [Header("Vida y represalia")]
     [SerializeField] private int vidaMaxima = 100;
     [SerializeField] private float distanciaMaximaPersecucionTorre = 15f;
 
